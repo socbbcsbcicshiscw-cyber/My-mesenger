@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#0b0b14"/>
+<title>КУБ — месенджер</title>
+<meta name="description" content="КУБ — простий та швидкий месенджер: чати, особисті повідомлення, контакти та профіль."/>
+<link rel="icon" type="image/png" href="assets/icon.png"/>
+<link rel="apple-touch-icon" href="assets/icon.png"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ══════════ ЕКРАН ЗАВАНТАЖЕННЯ (5 с, анімація куба) ══════════ -->
+<div id="splash" aria-label="Завантаження месенджера КУБ">
+  <div class="cube-scene">
+    <div class="cube">
+      <div class="face face-front">К</div>
+      <div class="face face-back">Б</div>
+      <div class="face face-right">У</div>
+      <div class="face face-left">✉</div>
+      <div class="face face-top"></div>
+      <div class="face face-bottom"></div>
+    </div>
+    <div class="cube-shadow"></div>
+  </div>
+  <div class="splash-brand">
+    <span class="splash-title">КУБ</span>
+    <span class="splash-sub">м е с е н д ж е р</span>
+  </div>
+  <div class="splash-progress"><div class="splash-progress-fill"></div></div>
+  <div class="splash-status" id="splashStatus">Ініціалізація…</div>
+</div>
+
+<!-- ══════════ ЗАСТОСУНОК ══════════ -->
+<div id="app" hidden>
+
+  <div class="screens">
+
+    <!-- ЧАТИ -->
+    <section class="screen active" id="screen-chats">
+      <header class="screen-header">
+        <img src="assets/icon.png" class="header-logo" alt="Логотип КУБ"/>
+        <h1>Чати</h1>
+        <button class="icon-btn" id="btnNewChat" title="Новий контакт" aria-label="Новий контакт">✎</button>
+      </header>
+      <div class="search-wrap">
+        <input id="chatSearch" type="search" placeholder="Пошук чатів…" autocomplete="off"/>
+      </div>
+      <div class="chat-list" id="chatList"></div>
+    </section>
+
+    <!-- КОНТАКТИ -->
+    <section class="screen" id="screen-contacts">
+      <header class="screen-header">
+        <img src="assets/icon.png" class="header-logo" alt="Логотип КУБ"/>
+        <h1>Контакти</h1>
+        <button class="icon-btn" id="btnAddContact" title="Створити контакт" aria-label="Створити контакт">＋</button>
+      </header>
+      <div class="contact-list" id="contactList"></div>
+      <button class="fab" id="fabAddContact" aria-label="Додати контакт">＋</button>
+    </section>
+
+    <!-- ПРОФІЛЬ -->
+    <section class="screen" id="screen-profile">
+      <header class="screen-header">
+        <img src="assets/icon.png" class="header-logo" alt="Логотип КУБ"/>
+        <h1>Профіль</h1>
+        <button class="icon-btn" id="btnEditProfile" title="Редагувати" aria-label="Редагувати профіль">✎</button>
+      </header>
+      <div id="profileCard"></div>
+    </section>
+
+  </div>
+
+  <!-- НИЖНІЙ БАР -->
+  <nav id="bottombar" aria-label="Головна навігація">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="nav-btn active" data-target="chats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Чати</span>
+    </button>
+    <button class="nav-btn" data-target="contacts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Контакти</span>
+    </button>
+    <button class="nav-btn" data-target="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Профіль</span>
+    </button>
+  </nav>
+
+  <!-- ЛС / РОЗМОВА -->
+  <div id="chatView" aria-hidden="true">
+    <header class="chat-header">
+      <button class="icon-btn" id="btnBack" aria-label="Назад">‹</button>
+      <div class="avatar sm" id="chatAvatar"></div>
+      <div class="chat-peer">
+        <div class="chat-peer-name" id="chatName"></div>
+        <div class="chat-peer-status" id="chatStatus">у мережі</div>
+      </div>
+      <button class="icon-btn" id="btnChatInfo" title="Про контакт" aria-label="Про контакт">ⓘ</button>
+    </header>
+    <div id="messages" aria-live="polite"></div>
+    <form id="msgForm" autocomplete="off">
+      <button type="button" class="icon-btn" id="btnAttach" aria-label="Прикріпити">📎</button>
+      <input id="msgInput" type="text" placeholder="Повідомлення…" maxlength="500"/>
+      <button type="submit" id="btnSend" aria-label="Надіслати">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4 21.85 12 3.4 3.6l-.01 6.53L14 12 3.39 13.87z"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <!-- ШТОРКА: НОВИЙ КОНТАКТ -->
+  <div class="sheet-backdrop" id="sheetBackdrop"></div>
+  <div class="sheet" id="sheetAddContact" role="dialog" aria-modal="true" aria-label="Новий контакт">
+    <div class="sheet-handle"></div>
+    <h2>Новий контакт</h2>
+    <form id="formAddContact">
+      <label>Ім'я
+        <input id="cName" type="text" required maxlength="40" placeholder="Напр. Олена Коваль"/>
+      </label>
+      <label>Телефон
+        <input id="cPhone" type="tel" maxlength="20" placeholder="+380 __ ___ __ __"/>
+      </label>
+      <label>Про контакт
+        <input id="cAbout" type="text" maxlength="60" placeholder="Подруга, колега…"/>
+      </label>
+      <button class="btn-primary" type="submit">Створити контакт</button>
+    </form>
+  </div>
+
+  <!-- ШТОРКА: РЕДАГУВАННЯ ПРОФІЛЮ -->
+  <div class="sheet" id="sheetEditProfile" role="dialog" aria-modal="true" aria-label="Редагування профілю">
+    <div class="sheet-handle"></div>
+    <h2>Редагувати профіль</h2>
+    <form id="formEditProfile">
+      <label>Ім'я
+        <input id="pName" type="text" required maxlength="40"/>
+      </label>
+      <label>Нікнейм
+        <input id="pUsername" type="text" maxlength="24" placeholder="@nickname"/>
+      </label>
+      <label>Про себе
+        <input id="pBio" type="text" maxlength="80"/>
+      </label>
+      <div class="color-row" id="colorRow"></div>
+      <button class="btn-primary" type="submit">Зберегти</button>
+    </form>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
